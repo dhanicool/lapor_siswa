@@ -35,3 +35,17 @@ try {
 }
 
 export { app, db, firebaseConfig };
+
+// Test connection on boot as recommended
+export async function testFirestoreConnection() {
+  try {
+    const { doc, getDoc } = await import('firebase/firestore');
+    await getDoc(doc(db, 'settings', 'school_profile'));
+    console.log('✅ Firebase Firestore connected successfully to database:', firebaseConfig.firestoreDatabaseId);
+    return true;
+  } catch (error) {
+    console.info('Firebase Firestore online connection notice:', error);
+    return false;
+  }
+}
+testFirestoreConnection();

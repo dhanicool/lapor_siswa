@@ -83,6 +83,16 @@ export const analyzeReportText = (text: string, category: ReportCategory, status
   return { urgency, riskFlag, summary };
 };
 
+export const cleanFirestorePayload = <T extends Record<string, any>>(obj: T): Partial<T> => {
+  const cleaned: Record<string, any> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      cleaned[key] = value;
+    }
+  }
+  return cleaned as Partial<T>;
+};
+
 export const getLocalReports = (): ReportItem[] => {
   try {
     const data = localStorage.getItem(LOCAL_STORAGE_REPORTS);
@@ -130,10 +140,12 @@ export const createReport = async (data: Omit<ReportItem, 'reportId' | 'createdA
   // 2. Save to Firestore
   try {
     const docRef = doc(db, REPORTS_COLLECTION, reportId);
-    await setDoc(docRef, {
+    const firestoreData = cleanFirestorePayload({
       ...newReport,
       timestamp: serverTimestamp()
     });
+    await setDoc(docRef, firestoreData);
+    console.log(`✅ Laporan ${reportId} berhasil disimpan ke Firestore!`);
   } catch (error) {
     console.warn('Could not save to Firestore directly, saved to local cache:', error);
   }
@@ -170,7 +182,7 @@ export const updateReportStatus = async (reportId: string, status: ReportStatus,
     if (counselingNotes !== undefined) updatePayload.counselingNotes = counselingNotes;
     if (assignedCounselor !== undefined) updatePayload.assignedCounselor = assignedCounselor;
 
-    await updateDoc(docRef, updatePayload);
+    await updateDoc(docRef, cleanFirestorePayload(updatePayload));
   } catch (e) {
     console.warn('Firestore updateDoc failed, updated locally:', e);
   }
@@ -196,7 +208,7 @@ export const subscribeReports = (callback: (reports: ReportItem[]) => void) => {
     const q = query(collection(db, REPORTS_COLLECTION), orderBy('createdAt', 'desc'));
     return onSnapshot(
       q,
-      (snapshot) => {
+      async (snapshot) => {
         if (!snapshot.empty) {
           const list: ReportItem[] = [];
           snapshot.forEach((d) => {
@@ -206,9 +218,11 @@ export const subscribeReports = (callback: (reports: ReportItem[]) => void) => {
           saveLocalReports(list);
           callback(list);
         } else {
-          // If empty in Firestore, check local
+          // If empty in Firestore, automatically populate with SAMPLE_REPORTS to initialize the collection in Firebase!
+          console.log('Firebase reports collection is empty, initializing seed data...');
+          await seedSampleReports();
           const local = getLocalReports();
-          callback(local);
+          callback(local.length > 0 ? local : SAMPLE_REPORTS);
         }
       },
       (error) => {
@@ -400,14 +414,35 @@ export const SAMPLE_REPORTS: ReportItem[] = [
 export const seedSampleReports = async (): Promise<void> => {
   saveLocalReports(SAMPLE_REPORTS);
   try {
-    for (const report of SAMPLE_REPORTS) {
+    const promises = SAMPLE_REPORTS.map((report) => {
       const docRef = doc(db, REPORTS_COLLECTION, report.reportId);
-      await setDoc(docRef, {
+      const firestoreData = cleanFirestorePayload({
         ...report,
         timestamp: serverTimestamp()
       });
-    }
+      return setDoc(docRef, firestoreData);
+    });
+    await Promise.all(promises);
+    console.log(`✅ Sukses menyinkronkan ${SAMPLE_REPORTS.length} data pengaduan ke Firestore collection '${REPORTS_COLLECTION}'!`);
   } catch (e) {
     console.warn('Could not write seed directly to Firestore, cached locally:', e);
   }
 };
+
+// Check and push sample data if Firestore is empty upon module boot
+export const ensureFirestoreReports = async (): Promise<void> => {
+  try {
+    const snapshot = await getDocs(collection(db, REPORTS_COLLECTION));
+    if (snapshot.empty) {
+      console.log('Firebase reports collection is empty, creating documents in Firestore...');
+      await seedSampleReports();
+    } else {
+      console.log(`Firebase reports collection already has ${snapshot.size} documents.`);
+    }
+  } catch (err) {
+    console.info('Auto-check Firestore reports info:', err);
+  }
+};
+
+// Trigger boot check
+ensureFirestoreReports();

@@ -1,0 +1,65 @@
+{
+  "entities": {
+    "Report": {
+      "title": "Report",
+      "description": "Dokumen laporan pengaduan perundungan siswa SMP",
+      "type": "object",
+      "properties": {
+        "reportId": { "type": "string", "description": "Format unik BL-YYYYMMDD-XXXX" },
+        "studentName": { "type": "string", "description": "Nama siswa pelapor atau Anonim" },
+        "isAnonymous": { "type": "boolean", "description": "Flag pelaporan rahasia tanpa identitas asli" },
+        "classGrade": { "type": "string", "description": "Kelas siswa, misal 7A, 8B, 9C" },
+        "contactInfo": { "type": "string", "description": "Nomor WhatsApp atau kontak pelapor / orang tua" },
+        "incidentDate": { "type": "string", "description": "Tanggal kejadian YYYY-MM-DD" },
+        "incidentTime": { "type": "string", "description": "Jam kejadian HH:mm" },
+        "timeSlotGroup": { "type": "string", "description": "Grup rentang jam kejadian rawan" },
+        "location": { "type": "string", "description": "Lokasi kejadian, misal Kantin, Kelas, Lapangan" },
+        "customLocation": { "type": "string", "description": "Detail lokasi spesifik tambahan" },
+        "reporterStatus": { "type": "string", "enum": ["Korban", "Saksi"] },
+        "category": { "type": "string", "description": "Kategori jenis bullying" },
+        "chronology": { "type": "string", "description": "Kronologi detail kejadian" },
+        "urgency": { "type": "string", "enum": ["Rendah", "Sedang", "Tinggi", "Darurat"] },
+        "status": { "type": "string", "enum": ["baru", "ditinjau", "ditindaklanjuti", "selesai"] },
+        "counselingNotes": { "type": "string", "description": "Catatan mediasi & tindak lanjut Guru BK" },
+        "assignedCounselor": { "type": "string", "description": "Nama Guru BK penanggung jawab" },
+        "aiSummary": { "type": "string", "description": "Ringkasan kronologi dari asisten AI" },
+        "aiRiskFlag": { "type": "string", "description": "Flag risiko dari analisis teks" },
+        "createdAt": { "type": "string", "description": "Waktu pembuatan ISO 8601" },
+        "updatedAt": { "type": "string", "description": "Waktu pembaruan ISO 8601" }
+      },
+      "required": ["reportId", "studentName", "incidentDate", "incidentTime", "location", "reporterStatus", "category", "chronology", "status", "createdAt", "updatedAt"]
+    },
+    "SchoolSettings": {
+      "title": "SchoolSettings",
+      "description": "Profil sekolah, kontak Guru BK, dan konfigurasi sistem",
+      "type": "object",
+      "properties": {
+        "schoolName": { "type": "string" },
+        "npsn": { "type": "string" },
+        "address": { "type": "string" },
+        "city": { "type": "string" },
+        "principalName": { "type": "string" },
+        "bkHeadTeacher": { "type": "string" },
+        "bkPhone": { "type": "string" },
+        "bkEmail": { "type": "string" },
+        "emergencyHotline": { "type": "string" },
+        "motto": { "type": "string" },
+        "adminUsername": { "type": "string" },
+        "adminPassword": { "type": "string" },
+        "adminName": { "type": "string" },
+        "lastUpdated": { "type": "string" }
+      },
+      "required": ["schoolName", "adminUsername", "adminPassword"]
+    }
+  },
+  "firestore": {
+    "/reports/{reportId}": {
+      "schema": "Report",
+      "description": "Koleksi seluruh laporan pengaduan perundungan siswa SMP"
+    },
+    "/settings/{settingId}": {
+      "schema": "SchoolSettings",
+      "description": "Dokumen pengaturan profil instansi sekolah dan kredensial admin Guru BK"
+    }
+  }
+}

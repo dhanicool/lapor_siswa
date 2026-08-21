@@ -78,7 +78,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const studentNavItem = {
     id: 'student-portal' as ActiveTab,
-    label: 'Form Pengaduan Siswa',
+    label: 'Portal Pengaduan & Lacak Tiket',
     icon: GraduationCap,
     badge: 'Portal Siswa',
   };
@@ -153,7 +153,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     </span>
                   </div>
                   <div className="text-[11px] font-normal text-blue-100 truncate">
-                    Kirim laporan rahasia & aman
+                    Buat pengaduan & pantau progres kasus
                   </div>
                 </div>
               </button>

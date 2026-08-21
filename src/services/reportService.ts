@@ -1,6 +1,7 @@
 import { 
   collection, 
   doc, 
+  getDoc,
   setDoc, 
   getDocs, 
   updateDoc, 
@@ -201,6 +202,36 @@ export const deleteReport = async (reportId: string): Promise<void> => {
   } catch (e) {
     console.warn('Firestore delete failed:', e);
   }
+};
+
+export const getReportById = async (searchId: string): Promise<ReportItem | null> => {
+  const normalizedId = searchId.trim().toUpperCase();
+  if (!normalizedId) return null;
+
+  // 1. Try local cache first
+  const localList = getLocalReports();
+  const foundLocal = localList.find(
+    r => r.reportId.toUpperCase() === normalizedId || (r.id && r.id.toUpperCase() === normalizedId)
+  );
+
+  // 2. Fetch directly from Firestore for latest status
+  try {
+    const docRef = doc(db, REPORTS_COLLECTION, normalizedId);
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      const data = snap.data() as ReportItem;
+      const report = {
+        ...data,
+        id: snap.id,
+        reportId: data.reportId || snap.id
+      };
+      return report;
+    }
+  } catch (err) {
+    console.info('Firestore getReportById fallback to local list:', err);
+  }
+
+  return foundLocal || null;
 };
 
 export const subscribeReports = (callback: (reports: ReportItem[]) => void) => {

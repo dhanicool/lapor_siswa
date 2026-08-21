@@ -6,15 +6,15 @@ import {
   persistentMultipleTabManager
 } from 'firebase/firestore';
 
-// Configuration from Firebase project setup
+// Configuration from Firebase project setup with optional environment variables for Vercel deployment
 const firebaseConfig = {
-  projectId: "predictive-winter-88chg",
-  appId: "1:685925558373:web:8efce3ad9656758e773e8c",
-  apiKey: "AIzaSyCt_ksyLidUoCR6hj5fkTR8jAqe1hzjnyQ",
-  authDomain: "predictive-winter-88chg.firebaseapp.com",
-  storageBucket: "predictive-winter-88chg.firebasestorage.app",
-  messagingSenderId: "685925558373",
-  firestoreDatabaseId: "ai-studio-e08d2f36-5deb-4a75-9f53-ba44008a5af2"
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "predictive-winter-88chg",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:685925558373:web:8efce3ad9656758e773e8c",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCt_ksyLidUoCR6hj5fkTR8jAqe1hzjnyQ",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "predictive-winter-88chg.firebaseapp.com",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "predictive-winter-88chg.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "685925558373",
+  firestoreDatabaseId: import.meta.env.VITE_FIREBASE_DATABASE_ID || "ai-studio-e08d2f36-5deb-4a75-9f53-ba44008a5af2"
 };
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();

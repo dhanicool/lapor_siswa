@@ -1,0 +1,6 @@
+{
+  "name": "Lapor Bullying SMP",
+  "description": "Aplikasi Pengaduan Bullying SMP dengan Firebase Firestore, Dashboard Interaktif Guru BK, Visualisasi Data, dan Manajemen Pengaturan Akun Sekolah.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

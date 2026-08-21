@@ -33,18 +33,26 @@ import { exportToExcel, exportToPdf } from './services/exportService';
 const AUTH_STORAGE_KEY = 'lapor_bullying_is_admin';
 
 export default function App() {
-  // Navigation & View State
-  const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
   // Authentication State
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
     try {
-      return localStorage.getItem(AUTH_STORAGE_KEY) === 'true';
+      const stored = localStorage.getItem(AUTH_STORAGE_KEY);
+      return stored !== null ? stored === 'true' : true;
     } catch {
-      return true; // Default admin mode for immediate interactive preview
+      return true;
     }
   });
+
+  // Navigation & View State
+  const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
+    try {
+      const stored = localStorage.getItem(AUTH_STORAGE_KEY);
+      return stored === 'false' ? 'student-portal' : 'dashboard';
+    } catch {
+      return 'dashboard';
+    }
+  });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   // Data States
@@ -102,6 +110,7 @@ export default function App() {
     } catch (e) {
       console.error(e);
     }
+    setActiveTab('dashboard');
     showToast(`Selamat datang, ${schoolSettings.adminName || 'Admin Guru BK'}!`);
   };
 
@@ -164,6 +173,7 @@ export default function App() {
           onOpenNewReport={() => setActiveTab('student-portal')}
           onExportExcel={() => handleExportExcel()}
           onExportPdf={() => handleExportPdf()}
+          onOpenLogin={() => setIsLoginModalOpen(true)}
           reports={reports}
         />
 
@@ -214,6 +224,7 @@ export default function App() {
           {activeTab === 'student-portal' && (
             <StudentPortal
               schoolSettings={schoolSettings}
+              isAdmin={isAdmin}
               onReportSubmitted={(newReport) => {
                 setReports((prev) => [newReport, ...prev]);
                 showToast(`Laporan ${newReport.reportId} berhasil dikirim ke Guru BK!`);

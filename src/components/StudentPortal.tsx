@@ -28,6 +28,7 @@ interface StudentPortalProps {
   schoolSettings: SchoolSettings;
   onReportSubmitted?: (report: ReportItem) => void;
   onGoToDashboard?: () => void;
+  isAdmin?: boolean;
 }
 
 const LOCATION_OPTIONS = [
@@ -57,7 +58,8 @@ const CATEGORY_OPTIONS: ReportCategory[] = [
 export const StudentPortal: React.FC<StudentPortalProps> = ({
   schoolSettings,
   onReportSubmitted,
-  onGoToDashboard
+  onGoToDashboard,
+  isAdmin
 }) => {
   // Form States
   const [studentName, setStudentName] = useState('');
@@ -258,12 +260,12 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
             >
               Buat Laporan Lainnya
             </button>
-            {onGoToDashboard && (
+            {isAdmin && onGoToDashboard && (
               <button
                 onClick={onGoToDashboard}
                 className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/20 transition-all"
               >
-                <span>Lihat Dashboard BK</span>
+                <span>Lihat di Dashboard BK</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             )}

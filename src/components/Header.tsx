@@ -21,6 +21,7 @@ interface HeaderProps {
   onOpenNewReport: () => void;
   onExportExcel: () => void;
   onExportPdf: () => void;
+  onOpenLogin?: () => void;
   reports: ReportItem[];
 }
 
@@ -33,8 +34,11 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenNewReport,
   onExportExcel,
   onExportPdf,
+  onOpenLogin,
   reports
 }) => {
+  const isStudentPortal = activeTab === 'student-portal';
+
   const getTabTitle = (tab: ActiveTab) => {
     switch (tab) {
       case 'dashboard':
@@ -82,7 +86,9 @@ export const Header: React.FC<HeaderProps> = ({
                 {schoolSettings.schoolName}
               </span>
               <span>/</span>
-              <span className="text-slate-700 capitalize font-semibold">{activeTab.replace('-', ' ')}</span>
+              <span className="text-slate-700 capitalize font-semibold">
+                {isStudentPortal ? 'Portal Siswa' : activeTab.replace('-', ' ')}
+              </span>
             </div>
             <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
               {getTabTitle(activeTab)}
@@ -98,63 +104,77 @@ export const Header: React.FC<HeaderProps> = ({
             <span>{todayStr}</span>
           </div>
 
-          {/* New Report Button (Always accessible) */}
-          <button
-            id="btn-header-new-report"
-            onClick={() => {
-              setActiveTab('student-portal');
-              onOpenNewReport();
-            }}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow-md transition-all shrink-0"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span className="hidden sm:inline">Buat Laporan Baru</span>
-            <span className="sm:hidden">Lapor</span>
-          </button>
+          {/* JIKA DI DASHBOARD BK: Tampilkan Tombol Buka Form Pengaduan & Export */}
+          {!isStudentPortal && (
+            <>
+              <button
+                id="btn-header-new-report"
+                onClick={() => {
+                  setActiveTab('student-portal');
+                  onOpenNewReport();
+                }}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow-md transition-all shrink-0"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span className="hidden sm:inline">Buka Form Pengaduan</span>
+                <span className="sm:hidden">Lapor</span>
+              </button>
 
-          {/* Export Buttons (Admin only or when on reports tab) */}
-          {isAdmin && (
-            <div className="hidden md:flex items-center gap-1.5">
+              {isAdmin && (
+                <div className="hidden md:flex items-center gap-1.5">
+                  <button
+                    id="btn-header-export-excel"
+                    onClick={onExportExcel}
+                    title="Unduh Rekapitulasi Excel (.xlsx)"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 transition-colors"
+                  >
+                    <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                    <span>Excel</span>
+                  </button>
+                  <button
+                    id="btn-header-export-pdf"
+                    onClick={onExportPdf}
+                    title="Unduh Laporan Resmi PDF (.pdf)"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 transition-colors"
+                  >
+                    <FileText className="w-4 h-4 text-rose-600" />
+                    <span>PDF</span>
+                  </button>
+                </div>
+              )}
+
               <button
-                id="btn-header-export-excel"
-                onClick={onExportExcel}
-                title="Unduh Rekapitulasi Excel (.xlsx)"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 transition-colors"
+                id="btn-header-switch-student"
+                onClick={() => setActiveTab('student-portal')}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
               >
-                <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-                <span>Excel</span>
+                <GraduationCap className="w-4 h-4 text-blue-600" />
+                <span className="hidden lg:inline">Portal Siswa</span>
               </button>
-              <button
-                id="btn-header-export-pdf"
-                onClick={onExportPdf}
-                title="Unduh Laporan Resmi PDF (.pdf)"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 transition-colors"
-              >
-                <FileText className="w-4 h-4 text-rose-600" />
-                <span>PDF</span>
-              </button>
-            </div>
+            </>
           )}
 
-          {/* Mode Switcher */}
-          {activeTab !== 'student-portal' ? (
-            <button
-              id="btn-header-switch-student"
-              onClick={() => setActiveTab('student-portal')}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
-            >
-              <GraduationCap className="w-4 h-4 text-blue-600" />
-              <span className="hidden lg:inline">Portal Siswa</span>
-            </button>
-          ) : (
-            <button
-              id="btn-header-switch-admin"
-              onClick={() => setActiveTab('dashboard')}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200/60 transition-colors"
-            >
-              <ShieldCheck className="w-4 h-4 text-blue-600" />
-              <span className="hidden lg:inline">Dashboard BK</span>
-            </button>
+          {/* JIKA DI PORTAL SISWA: Tampilkan Tombol Masuk/Login ke Dashboard BK */}
+          {isStudentPortal && (
+            isAdmin ? (
+              <button
+                id="btn-header-switch-admin"
+                onClick={() => setActiveTab('dashboard')}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-colors"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span>Masuk Dashboard BK</span>
+              </button>
+            ) : (
+              <button
+                id="btn-header-login-admin"
+                onClick={onOpenLogin}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200/80 transition-colors"
+              >
+                <ShieldCheck className="w-4 h-4 text-blue-600" />
+                <span>Login Guru BK</span>
+              </button>
+            )
           )}
         </div>
       </div>
